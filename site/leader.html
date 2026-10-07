@@ -1,0 +1,84 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>台账事件判读台 · 组长裁定</title>
+<link rel="stylesheet" href="assets/app.css">
+<style>
+  .warnbar { background: #fff1e6; color: #8a3b00; padding: 4px 14px; border-bottom: 1px solid #f3c9a6; font-size: 13px; }
+  .ledger { font-size: 13px; }
+  .ledger table { width: 100%; border-collapse: collapse; }
+  .ledger td { border-bottom: 1px solid #f0f2f4; padding: 2px 4px; vertical-align: top; }
+  .ledger td:first-child { color: var(--muted); white-space: nowrap; width: 5.5em; }
+  .people { display: flex; flex-direction: column; gap: 6px; }
+  .person { border: 1px solid var(--line); border-radius: 6px; padding: 6px; font-size: 13px; }
+  .person .ph { display: flex; gap: 6px; align-items: center; }
+  .dot { width: 10px; height: 10px; border-radius: 50%; display: inline-block; }
+  .person label { display: flex; gap: 4px; align-items: baseline; font-size: 12px; }
+  .vopts button { min-width: 3em; }
+  .pill { font-size: 11px; border-radius: 8px; padding: 0 5px; background: #eef0f2; color: var(--muted); }
+  .pill.need { background: #ffe9e9; color: #b42318; }
+  .pill.done { background: #e3f6ee; color: var(--ok); }
+</style>
+</head>
+<body>
+<div class="warnbar">组长版：含台账内容（线路、里程、坐标、原文），只在本机使用，不要外发；不要放进同学的分发包。</div>
+<header class="top">
+  <b class="brand">组长裁定</b>
+  <span id="peopleInfo" class="muted"></span>
+  <span class="sp"></span>
+  <span id="agreeInfo" class="muted small"></span>
+  <button id="importBtn" class="ghost">导入同学判读</button>
+  <button id="importVBtn" class="ghost">导入裁定（接着做）</button>
+  <button id="exportBtn" class="primary">导出裁定</button>
+  <input id="importFile" type="file" accept=".json" multiple hidden>
+  <input id="importVFile" type="file" accept=".json" hidden>
+</header>
+<div class="layout">
+  <aside class="list">
+    <div class="listhead">
+      <select id="filter">
+        <option value="need">待裁定</option>
+        <option value="done">已裁定</option>
+        <option value="judged">同学判过的</option>
+        <option value="all">全部窗口</option>
+      </select>
+      <span id="listCount" class="muted"></span>
+    </div>
+    <div id="wlist" class="wlist"></div>
+  </aside>
+  <main class="viewer">
+    <div class="vbar">
+      <b id="curWid">—</b><span id="pairInfo" class="muted"></span><span class="sp"></span>
+      <div class="seg">
+        <button id="tcBtn" class="on">真彩色</button><button id="qBtn">质量层</button><button id="rBtn" class="on">圆圈</button>
+        <button id="sBtn">源区</button><button id="aiBtn">AI 预测</button><button id="fBtn">全图</button>
+      </div>
+    </div>
+    <div class="pair">
+      <figure class="pane"><figcaption><b>事件前</b> <span id="capB"></span></figcaption><canvas id="cvB"></canvas></figure>
+      <figure class="pane"><figcaption><b>事件后</b> <span id="capA"></span> <span id="flickTag" class="tag" hidden>正在显示事件前</span></figcaption><canvas id="cvA"></canvas></figure>
+    </div>
+    <div class="hint muted">滚轮缩放、拖动平移，两边同步；按住空格闪比。不同同学的标记用不同颜色。</div>
+  </main>
+  <aside class="form">
+    <section class="step ledger"><h3>台账</h3><div id="ledgerBox"></div></section>
+    <section class="step"><h3>同学判读</h3><div id="peopleBox" class="people"></div></section>
+    <section class="step" id="verdictBox">
+      <h3>裁定</h3>
+      <div class="row"><span>结论</span><div class="opts vopts" id="vOpts"></div></div>
+      <p class="muted small" id="vHint"></p>
+      <div class="row"><span>位置</span><div class="opts" id="posOpts"></div></div>
+      <div class="row"><span>要高分核实</span><div class="opts" id="hrOpts"></div></div>
+      <div class="row"><span>进精标</span><div class="opts" id="prOpts"></div></div>
+      <textarea id="vnote" rows="2" placeholder="组长备注（只自己看，可以写台账内容）"></textarea>
+      <input id="vhint" placeholder="给精标同学的提示（会给同学看，不要写台账内容，比如“看事件点东北的新裸土”）">
+    </section>
+    <div class="actions"><div id="msg" class="msg"></div><button id="saveBtn" class="primary big">保存裁定并下一个（Enter）</button></div>
+  </aside>
+</div>
+<div id="toast" class="toast" hidden></div>
+<script src="assets/leader.js"></script>
+</body>
+</html>

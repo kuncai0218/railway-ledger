@@ -1,0 +1,69 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>铁路沿线影像判读台 · 精标</title>
+<link rel="stylesheet" href="assets/app.css">
+<style>
+  .tools { display: flex; flex-direction: column; gap: 8px; }
+  .tools .opts button.on { color: #fff; }
+  .tools .opts button[data-v="1"].on { background: #d92d20; border-color: #d92d20; }
+  .tools .opts button[data-v="2"].on { background: #dca400; border-color: #dca400; }
+  .tools .opts button[data-v="0"].on { background: #12805c; border-color: #12805c; }
+  .legend { font-size: 12px; display: flex; gap: 10px; flex-wrap: wrap; }
+  .legend i { display: inline-block; width: 12px; height: 12px; border-radius: 2px; vertical-align: -2px; margin-right: 3px; }
+  .region { border: 1px solid var(--line); border-radius: 6px; padding: 6px; margin-bottom: 6px; font-size: 13px; }
+  .region .tags { display: flex; flex-wrap: wrap; gap: 4px; margin-top: 4px; }
+  .region .tags button { font-size: 12px; padding: 2px 6px; }
+  .region .tags button.on { background: #ffe2df; border-color: #d92d20; }
+  .hintbox { background: #f0f6ff; border: 1px solid #c9dcfb; border-radius: 6px; padding: 6px 8px; font-size: 13px; }
+</style>
+</head>
+<body>
+<header class="top">
+  <b class="brand">铁路沿线影像精标</b>
+  <span class="muted">只在本机使用，资料不外发</span>
+  <span class="sp"></span>
+  <span id="progText" class="muted"></span>
+  <button id="whoBtn" class="ghost">精标人：<b id="whoName">未填写</b></button>
+  <a class="ghost btn" href="../规范/判读规范.html#精标" target="_blank" rel="noopener">精标规则</a>
+  <button id="importBtn" class="ghost">导入</button>
+  <button id="exportBtn" class="primary">导出我的精标</button>
+  <input id="importFile" type="file" accept=".json" hidden>
+</header>
+<div class="layout">
+  <aside class="list"><div class="listhead"><b>要精标的窗口</b><span id="listCount" class="muted"></span></div><div id="wlist" class="wlist"></div></aside>
+  <main class="viewer">
+    <div class="vbar">
+      <b id="curWid">—</b><span id="pairInfo" class="muted"></span><span class="sp"></span>
+      <div class="seg"><button id="tcBtn" class="on">真彩色</button><button id="lBtn" class="on">标签层</button><button id="rBtn" class="on">圆圈</button><button id="fBtn">全图</button></div>
+    </div>
+    <div class="pair">
+      <figure class="pane"><figcaption><b>前一期</b> <span id="capB"></span></figcaption><canvas id="cvB"></canvas></figure>
+      <figure class="pane"><figcaption><b>后一期</b> <span id="capA"></span> <span id="flickTag" class="tag" hidden>正在显示前一期</span></figcaption><canvas id="cvA"></canvas></figure>
+    </div>
+    <div class="hint muted">左键涂，右键拖动平移，滚轮缩放；按住空格闪比。一个格子 10 米，一多半变了才涂“变化”。</div>
+  </main>
+  <aside class="form tools">
+    <div id="hint" class="hintbox" hidden></div>
+    <section class="step">
+      <h3>画笔</h3>
+      <div class="opts" id="valOpts">
+        <button data-v="1" class="on" title="快捷键 1">变化</button><button data-v="2" title="快捷键 2">拿不准</button><button data-v="0" title="快捷键 3">看过没变（橡皮）</button>
+      </div>
+      <div class="row"><span>笔刷</span><div class="opts" id="sizeOpts"><button data-v="1" class="on">1 格</button><button data-v="3">3 格</button><button data-v="5">5 格</button></div></div>
+      <div class="row"><span>方式</span><div class="opts" id="shapeOpts"><button data-v="brush" class="on" title="B">画笔</button><button data-v="rect" title="G">拉框整片填</button></div></div>
+      <div class="row"><button id="allSeen">整窗设为“看过没变”（不动已涂的变化和拿不准）</button></div>
+      <div class="row"><button id="undoBtn">撤销（Ctrl+Z）</button><button id="redoBtn">重做（Ctrl+Y）</button></div>
+      <div class="legend"><span><i style="background:#ff3b30"></i>变化</span><span><i style="background:#ffd400"></i>拿不准</span><span><i style="background:rgba(0,0,0,.45)"></i>还没看</span><span><i style="background:transparent;border:1px solid #999"></i>看过没变</span></div>
+    </section>
+    <section class="step"><h3>变化块 <span class="muted small">（连在一起的变化格自动编号）</span></h3><div id="regions"></div></section>
+    <div class="actions"><div id="msg" class="msg"></div><button id="saveBtn" class="primary big">保存并下一个（Enter）</button><div id="countInfo" class="muted small"></div></div>
+  </aside>
+</div>
+<div class="modal" id="whoModal" hidden><div class="card"><h3>请填写你的名字</h3><input id="whoInput" maxlength="20" placeholder="例如：张三"><div class="right"><button id="whoOk" class="primary">确定</button></div></div></div>
+<div id="toast" class="toast" hidden></div>
+<script src="assets/precise.js"></script>
+</body>
+</html>

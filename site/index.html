@@ -1,0 +1,134 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>铁路沿线影像判读台</title>
+<link rel="stylesheet" href="assets/app.css">
+</head>
+<body>
+<header class="top">
+  <b class="brand">铁路沿线影像判读台</b>
+  <span class="muted">只在本机使用，资料不外发</span>
+  <span class="sp"></span>
+  <span id="progText" class="muted"></span>
+  <button id="whoBtn" class="ghost" title="换判读人">判读人：<b id="whoName">未填写</b></button>
+  <a class="ghost btn" href="../规范/判读规范.html" target="_blank" rel="noopener">判读规范和示例</a>
+  <button id="keysBtn" class="ghost">快捷键</button>
+  <button id="importBtn" class="ghost">导入</button>
+  <button id="exportBtn" class="primary">导出我的判读</button>
+  <input id="importFile" type="file" accept=".json" multiple hidden>
+</header>
+
+<div class="layout">
+  <aside class="list">
+    <div class="listhead">
+      <select id="filter">
+        <option value="all">全部窗口</option>
+        <option value="todo">没做</option>
+        <option value="draft">做了一半</option>
+        <option value="saved">已保存</option>
+        <option value="unsure">拿不准的</option>
+        <option value="change">有变化的</option>
+      </select>
+      <span id="listCount" class="muted"></span>
+    </div>
+    <div id="wlist" class="wlist"></div>
+  </aside>
+
+  <main class="viewer">
+    <div class="vbar">
+      <b id="curWid">—</b>
+      <span id="pairInfo" class="muted"></span>
+      <span class="sp"></span>
+      <div class="seg" id="modeSeg">
+        <button data-mode="pan" class="on" title="拖动、缩放（H）">拖动</button>
+        <button data-mode="point" title="点一个点（P）">点</button>
+        <button data-mode="box" title="拉一个框（B）">框</button>
+      </div>
+      <div class="seg">
+        <button id="tcBtn" class="on" title="真彩色 / 假彩色（T）">真彩色</button>
+        <button id="qBtn" title="质量层（Q）">质量层</button>
+        <button id="rBtn" class="on" title="200 米、500 米圈（R）">圆圈</button>
+        <button id="sBtn" title="源区和沟谷（S）">源区</button>
+        <button id="fBtn" title="2 km 全图 / 1.2 km（F）">全图</button>
+      </div>
+    </div>
+    <div class="pair" id="pair">
+      <figure class="pane">
+        <figcaption><b>前一期</b> <span id="capB"></span></figcaption>
+        <canvas id="cvB"></canvas>
+      </figure>
+      <figure class="pane">
+        <figcaption><b>后一期</b> <span id="capA"></span> <span id="flickTag" class="tag" hidden>正在显示前一期</span></figcaption>
+        <canvas id="cvA"></canvas>
+      </figure>
+    </div>
+    <div class="hint muted">滚轮缩放，拖动平移；两边同步。按住空格，右图临时换成前一期（闪比）。标点、框时左右两图都可以。</div>
+  </main>
+
+  <aside class="form" id="form">
+    <section class="step" id="stepB">
+      <h3>① 前一期清楚吗</h3>
+      <div class="opts q" data-side="before"></div>
+      <div class="reasons" data-side="before" hidden></div>
+      <input class="qnote" data-side="before" placeholder="选“其他”时必须写明" hidden>
+    </section>
+    <section class="step" id="stepA">
+      <h3>② 后一期清楚吗</h3>
+      <div class="opts q" data-side="after"></div>
+      <div class="reasons" data-side="after" hidden></div>
+      <input class="qnote" data-side="after" placeholder="选“其他”时必须写明" hidden>
+    </section>
+    <section class="step" id="stepC">
+      <h3>③ 两期比，有没有真实的地表变化</h3>
+      <div class="opts" id="changeOpts"></div>
+      <p class="muted small" id="changeHint"></p>
+    </section>
+    <section class="step" id="stepM">
+      <h3>④ 在哪、是什么 <span class="muted small">（用上方“点”“框”在图上标）</span></h3>
+      <div id="marks"></div>
+    </section>
+    <section class="step" id="stepE">
+      <h3>⑤ 把握和备注</h3>
+      <div class="row"><span>把握</span><div class="opts" id="confOpts"></div></div>
+      <div class="row"><span>要不要高分影像核实</span><div class="opts" id="hrOpts"></div></div>
+      <textarea id="note" rows="2" placeholder="备注（可不填）"></textarea>
+    </section>
+    <div class="actions">
+      <div id="msg" class="msg"></div>
+      <button id="saveBtn" class="primary big">保存并下一个（Enter）</button>
+      <div class="muted small" id="timeInfo"></div>
+    </div>
+  </aside>
+</div>
+
+<div class="modal" id="whoModal" hidden>
+  <div class="card">
+    <h3>请填写你的名字</h3>
+    <p class="muted small">名字会写进导出文件，组长靠它区分每个人的判读。换名字后看到的是那个名字的记录。</p>
+    <input id="whoInput" maxlength="20" placeholder="例如：张三">
+    <div class="right"><button id="whoOk" class="primary">确定</button></div>
+  </div>
+</div>
+<div class="modal" id="keysModal" hidden>
+  <div class="card">
+    <h3>快捷键</h3>
+    <table class="keys">
+      <tr><td>↑ ↓</td><td>上一个、下一个窗口</td></tr>
+      <tr><td>1—4</td><td>选当前这一步的四档质量（先前图，后后图）</td></tr>
+      <tr><td>Enter</td><td>保存并到下一个</td></tr>
+      <tr><td>H / P / B</td><td>拖动 / 点 / 框</td></tr>
+      <tr><td>T</td><td>真彩色和假彩色切换</td></tr>
+      <tr><td>Q R S</td><td>质量层、圆圈、源区开关</td></tr>
+      <tr><td>F</td><td>2 km 全图和 1.2 km 切换</td></tr>
+      <tr><td>按住空格</td><td>右图临时显示前一期（闪比）</td></tr>
+      <tr><td>Esc</td><td>取消正在画的框</td></tr>
+    </table>
+    <div class="right"><button class="primary" data-close>知道了</button></div>
+  </div>
+</div>
+<div id="toast" class="toast" hidden></div>
+<script src="assets/app.js"></script>
+</body>
+</html>
